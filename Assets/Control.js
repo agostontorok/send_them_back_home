@@ -44,6 +44,8 @@ var tps : Camera;
 var upcam : Camera;
 var lockupcam : Camera;
 var tpsallo : Camera;
+var fps_w_map : Camera;
+var map_looker : Camera;
 
 var Order = new Array (1,2,3,4,5);
 var SetTime : float;
@@ -121,6 +123,8 @@ if (cam == 1) {fps.enabled = true;
 		tps.enabled = false;tpsallo.enabled = false;
 		upcam.enabled = false;
 		lockupcam.enabled = false;
+		fps_w_map.enabled = false;
+		map_looker.enabled = false;
 		camera_id = "fps";
 		GameObject.Find("avatar").transform.position.y=-2;
 		if (GameObject.Find("roof")){GameObject.Find("roof").renderer.enabled = true; }}
@@ -128,6 +132,8 @@ if (cam == 2) {tps.enabled = true;
 		fps.enabled = false;tpsallo.enabled = false;
 		upcam.enabled = false;
 		lockupcam.enabled = false;
+		fps_w_map.enabled = false;
+		map_looker.enabled = false;
 		camera_id = "tps";
 		GameObject.Find("avatar").transform.position.y=0.5;
 		if (GameObject.Find("roof")){GameObject.Find("roof").renderer.enabled = true; }}
@@ -135,6 +141,8 @@ if (cam == 3) { upcam.enabled = true;
 		fps.enabled = false;tpsallo.enabled = false;
 		tps.enabled = false;
 		lockupcam.enabled = false;
+		fps_w_map.enabled = false;
+		map_looker.enabled = false;
 		camera_id = "upcam";
 		GameObject.Find("avatar").transform.position.y=0.5;
 		if (GameObject.Find("roof")){GameObject.Find("roof").renderer.enabled = false; }}
@@ -143,6 +151,8 @@ if (cam == 4) {lockupcam.enabled = true;
 		upcam.enabled = false;
 		fps.enabled = false;
 		tps.enabled = false;
+		fps_w_map.enabled = false;
+		map_looker.enabled = false;
 		camera_id = "lockupcam";
 		GameObject.Find("avatar").transform.position.y=0.5;
 		if (GameObject.Find("roof")){GameObject.Find("roof").renderer.enabled = false; }}
@@ -151,10 +161,22 @@ if (cam == 5) {cam = 0; tpsallo.enabled = true;
 		upcam.enabled = false;
 		fps.enabled = false;
 		tps.enabled = false;
+		fps_w_map.enabled = false;
+		map_looker.enabled = false;
 		camera_id = "tpsallo";
 		GameObject.Find("avatar").transform.position.y=0.5;
 		if (GameObject.Find("roof")){GameObject.Find("roof").renderer.enabled = true; }}
-if (cam == 5) {}		
+if (cam == 6) {
+		tpsallo.enabled = false;
+		lockupcam.enabled = false;
+		upcam.enabled = false;
+		fps.enabled = false;
+		tps.enabled = false;
+		fps_w_map.enabled = true;
+		map_looker.enabled = true;
+		camera_id = "maplooker";
+		GameObject.Find("avatar").transform.position.y=-2;
+		if (GameObject.Find("roof")){GameObject.Find("roof").renderer.enabled = true; }}	
 
 
 
@@ -186,6 +208,7 @@ if (controller.isGrounded)
 		if (Input.GetKeyDown("3")) {StopCoroutine("Triggertad");StartCoroutine("Triggertad");cam=3;}
 		if (Input.GetKeyDown("4")) {StopCoroutine("Triggertad");StartCoroutine("Triggertad");cam=4;}
 		if (Input.GetKeyDown("5")) {StopCoroutine("Triggertad");StartCoroutine("Triggertad");cam=5;}
+		if (Input.GetKeyDown("6")) {StopCoroutine("Triggertad");StartCoroutine("Triggertad");cam=6;}
 		
 		if (Input.GetKeyDown("escape")) {vege_signal =1;}
 		//}
