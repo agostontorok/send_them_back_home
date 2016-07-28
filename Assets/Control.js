@@ -46,6 +46,7 @@ var lockupcam : Camera;
 var tpsallo : Camera;
 var fps_w_map : Camera;
 var map_looker : Camera;
+public var current_camera : Camera;
 
 var Order = new Array (1,2,3,4,5);
 var SetTime : float;

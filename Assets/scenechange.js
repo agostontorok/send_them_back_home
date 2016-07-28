@@ -21,6 +21,9 @@ function OnGUI() {
 	if (GUI.Button(Rect(1010,370,100,50),"Practice"))
 		{
          Application.LoadLevel ("practice");}
-	if (GUI.Button(Rect(1010,470,100,50),"QUIT"))
+    if (GUI.Button(Rect(1010,430,100,50),"sample_city"))
+		{
+         Application.LoadLevel ("sample_city");}
+	if (GUI.Button(Rect(1010,500,100,50),"QUIT"))
         { Application.Quit();}
 }

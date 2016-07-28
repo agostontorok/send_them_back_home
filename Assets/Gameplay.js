@@ -52,6 +52,20 @@ function Awake()
 	BlueSpaceShip = GameObject.Find("blueUFO_STBH");
 	BlueBag = GameObject.Find("bluebag");
 	YellowBag = GameObject.Find("yellowbag");
+	
+	print(GameObject.Find("Player_STBH").GetComponent(Control).Order.length );
+	//GameObject.Find("Player").GetComponent(Control).cam = GameObject.Find("Player").GetComponent(Control).Order[kovetkezo_cam];
+	if (Application.loadedLevel  == 1){uncer=3.0; helyekx = new Array ( -30, 30, 30, -30, -15, -30, 0, -30, -30, -15, -15, 15, 0, 30, -30, 30, 15, 30, -30, 0, -15, 15, 0, 15, 0, 15, 30, 30, -15); helyeky= new Array (30, 30, -30, -30, -30, 15, 30, -15, 0, 15, -15, 0, 15, 30, -30, -30, -15, 0, 30, -30, 30, 30, -15, -30, 0, 15, -15, 15, 0);}
+	if (Application.loadedLevel  == 2){uncer=0.5; helyekx = new Array (-5, 5, -7, 7, -3.8, -7.6, 0, -7.6, -7.6, -3.8, -3.8, 3.8, 0, 7.6, -7.6, 6, 3.8, 7.6, -7.6, 0, -6, 3.8, 0, 3.8, 0, 3.8, 7.6, 7.3, -3.8 );  helyeky = new Array (-5, 5, -7, 7, -7.6, 3.8, 7.6, -3.8, 0, 3.8, -3.8, 0, 3.8, 7.6, -7.6, 6, -3.8, 0, 7.6, -7.6, -6, 7.6, -3.8, -7.6, 0, 3.8, -3.8, 3.8, 0 ); }
+	if (Application.loadedLevel  == 3){uncer=2.5; helyekx = new Array (0, 40, -5, 45, 0, -13, 13, -13, -13, 0, 0, 26, 13, 39, -13, 39, 26, 39, -13, 15, 0, 26, 13, 26, 13, 26, 39, 39, 0 ); helyeky = new Array (20, -10, 22, -10, -18, 15, 26, -7, 4, 15, -7, 4, 15, 26, -18, -18, -7, 4, 26, -18, 26, 26, -7, -18, 4, 15, -7, 15, 4);}
+	if (Application.loadedLevel  == 4){uncer=2.0; helyekx = new Array (-26, 12, 5, 5, -15, -25, -5, -25, -25, -15, -15, 5, -5, 15, -25, 15, 5, 15, -25, -5, -15, 5, -5, 5, -5, 5, 15, 15, -15 );helyeky = new Array ( -26, -26, -26, -20, -30, 0, 10, -20, -10, 0, -20, -10, 0, 10, -30, -30, -20, -10, 10, -30, 10, 10, -20, -30, -10, 0, -20, 0, -10);}
+	if (Application.loadedLevel  == 5){uncer=2.5; helyekx = new Array (0, 40, -5, 45, 0, -13, 13, -13, -13, 0, 0, 26, 13, 39, -13, 39, 26, 39, -13, 15, 0, 26, 13, 26, 13, 26, 39, 39, 0 ); helyeky = new Array (20, -10, 22, -10, -18, 15, 26, -7, 4, 15, -7, 4, 15, 26, -18, -18, -7, 4, 26, -18, 26, 26, -7, -18, 4, 15, -7, 15, 4);}
+	if (Application.loadedLevel  == 6){uncer=3.0; helyekx = new Array ( -30, 30, 30, -30, -15, -30, 0, -30, -30, -15, -15, 15, 0, 30, -30, 30, 15, 30, -30, 0, -15, 15, 0, 15, 0, 15, 30, 30, -15); helyeky= new Array (30, 30, -30, -30, -30, 15, 30, -15, 0, 15, -15, 0, 15, 30, -30, -30, -15, 0, 30, -30, 30, 30, -15, -30, 0, 15, -15, 15, 0);}
+	if (Application.loadedLevel  == 7){uncer=0.5; helyekx = new Array (-5, 5, -7, 7, -3.8, -7.6, 0, -7.6, -7.6, -3.8, -3.8, 3.8, 0, 7.6, -7.6, 6, 3.8, 7.6, -7.6, 0, -6, 3.8, 0, 3.8, 0, 3.8, 7.6, 7.3, -3.8 );  helyeky = new Array (-5, 5, -7, 7, -7.6, 3.8, 7.6, -3.8, 0, 3.8, -3.8, 0, 3.8, 7.6, -7.6, 6, -3.8, 0, 7.6, -7.6, -6, 7.6, -3.8, -7.6, 0, 3.8, -3.8, 3.8, 0 ); }
+	if (Application.loadedLevel  == 8){uncer=3.0;
+									   helyekx = new Array ( -30, 30, 30, -30, -15, -30, 0, -30, -30, -15, -15, 15, 0, 30, -30, 30, 15, 30, -30, 0, -15, 15, 0, 15, 0, 15, 30, 30, -15); 
+									   helyeky= new Array (30, 30, -30, -30, -30, 15, 30, -15, 0, 15, -15, 0, 15, 30, -30, -30, -15, 0, 30, -30, 30, 30, -15, -30, 0, 15, -15, 15, 0);}
+	
 
 	LilAlienYellow.pixelInset.x = Screen.width*.85f;
 	LilAlienYellow.pixelInset.y = Screen.height*.7f;
@@ -63,19 +77,20 @@ function Awake()
 	var height = Screen.width*.12f;
 	LilAlienBlue.pixelInset.size = new Vector2(width,height);
 	LilAlienYellow.pixelInset.size = new Vector2(width,height);
-
+	if (Application.loadedLevel == 8) {
+		var MapLevelCamera = GameObject.Find("1Camera_w_map");
+		// x_pos = MapLevelCamera.camera.orthographicSize * 2 * MapLevelCamera.camera.aspect; TODO check why this not works
+		x_pos = Screen.width*0.4;
+		}
+		else {x_pos = Screen.width;
+		}
+		print(x_pos);
+		LilAlienBlue.pixelInset.x= x_pos;
+		LilAlienYellow.pixelInset.x = x_pos;
+	
 	//CUBE : GameObject; GameObject.Find("GO").GetComponent(GUITexture);
 
-	print(GameObject.Find("Player_STBH").GetComponent(Control).Order.length );
-//GameObject.Find("Player").GetComponent(Control).cam = GameObject.Find("Player").GetComponent(Control).Order[kovetkezo_cam];
-	if (Application.loadedLevel  == 1){uncer=3.0; helyekx = new Array ( -30, 30, 30, -30, -15, -30, 0, -30, -30, -15, -15, 15, 0, 30, -30, 30, 15, 30, -30, 0, -15, 15, 0, 15, 0, 15, 30, 30, -15); helyeky= new Array (30, 30, -30, -30, -30, 15, 30, -15, 0, 15, -15, 0, 15, 30, -30, -30, -15, 0, 30, -30, 30, 30, -15, -30, 0, 15, -15, 15, 0);}
-	if (Application.loadedLevel  == 2){uncer=0.5; helyekx = new Array (-5, 5, -7, 7, -3.8, -7.6, 0, -7.6, -7.6, -3.8, -3.8, 3.8, 0, 7.6, -7.6, 6, 3.8, 7.6, -7.6, 0, -6, 3.8, 0, 3.8, 0, 3.8, 7.6, 7.3, -3.8 );  helyeky = new Array (-5, 5, -7, 7, -7.6, 3.8, 7.6, -3.8, 0, 3.8, -3.8, 0, 3.8, 7.6, -7.6, 6, -3.8, 0, 7.6, -7.6, -6, 7.6, -3.8, -7.6, 0, 3.8, -3.8, 3.8, 0 ); }
-	if (Application.loadedLevel  == 3){uncer=2.5; helyekx = new Array (0, 40, -5, 45, 0, -13, 13, -13, -13, 0, 0, 26, 13, 39, -13, 39, 26, 39, -13, 15, 0, 26, 13, 26, 13, 26, 39, 39, 0 ); helyeky = new Array (20, -10, 22, -10, -18, 15, 26, -7, 4, 15, -7, 4, 15, 26, -18, -18, -7, 4, 26, -18, 26, 26, -7, -18, 4, 15, -7, 15, 4);}
-	if (Application.loadedLevel  == 4){uncer=2.0; helyekx = new Array (-26, 12, 5, 5, -15, -25, -5, -25, -25, -15, -15, 5, -5, 15, -25, 15, 5, 15, -25, -5, -15, 5, -5, 5, -5, 5, 15, 15, -15 );helyeky = new Array ( -26, -26, -26, -20, -30, 0, 10, -20, -10, 0, -20, -10, 0, 10, -30, -30, -20, -10, 10, -30, 10, 10, -20, -30, -10, 0, -20, 0, -10);}
-	if (Application.loadedLevel  == 5){uncer=2.5; helyekx = new Array (0, 40, -5, 45, 0, -13, 13, -13, -13, 0, 0, 26, 13, 39, -13, 39, 26, 39, -13, 15, 0, 26, 13, 26, 13, 26, 39, 39, 0 ); helyeky = new Array (20, -10, 22, -10, -18, 15, 26, -7, 4, 15, -7, 4, 15, 26, -18, -18, -7, 4, 26, -18, 26, 26, -7, -18, 4, 15, -7, 15, 4);}
-	if (Application.loadedLevel  == 6){uncer=3.0; helyekx = new Array ( -30, 30, 30, -30, -15, -30, 0, -30, -30, -15, -15, 15, 0, 30, -30, 30, 15, 30, -30, 0, -15, 15, 0, 15, 0, 15, 30, 30, -15); helyeky= new Array (30, 30, -30, -30, -30, 15, 30, -15, 0, 15, -15, 0, 15, 30, -30, -30, -15, 0, 30, -30, 30, 30, -15, -30, 0, 15, -15, 15, 0);}
-	if (Application.loadedLevel  == 7){uncer=0.5; helyekx = new Array (-5, 5, -7, 7, -3.8, -7.6, 0, -7.6, -7.6, -3.8, -3.8, 3.8, 0, 7.6, -7.6, 6, 3.8, 7.6, -7.6, 0, -6, 3.8, 0, 3.8, 0, 3.8, 7.6, 7.3, -3.8 );  helyeky = new Array (-5, 5, -7, 7, -7.6, 3.8, 7.6, -3.8, 0, 3.8, -3.8, 0, 3.8, 7.6, -7.6, 6, -3.8, 0, 7.6, -7.6, -6, 7.6, -3.8, -7.6, 0, 3.8, -3.8, 3.8, 0 ); }
-
+	
 	real_x = Alien.transform.position.x;
 	real_y = Alien.transform.position.z;
 	
@@ -106,6 +121,10 @@ function Awake()
 
 function Update()
 {	
+// adjust the position of the alien to the camera
+
+
+
 //print(ind);
 
 //change camera in every set
