@@ -1,43 +1,24 @@
 // Attach this to player, the two triggers are the alien and the spaceships
 
 //DECLARATION
-//Feedback to participant
-var congrat: GUITexture;
-var imSorry: GUITexture;
-var controlObject: GameObject; // to end it, when time is up TODO
-var littleAlienYellow: GUITexture;
-var littleAlienBlue: GUITexture;
-var myStyle: GUIStyle;
-var endTime: float;
-public
-var NOWTIME: float;
-
-
 //Colliders
 var alien: GameObject;
-var yellowSpaceShip: GameObject;
-var blueSpaceShip: GameObject;
 var takeMe: AudioSource;
 var thankYou: AudioSource;
-var bags;
-var blueBag: GameObject;
-var yellowBag: GameObject;
-
+var bags = {};
+var spaceShips = {};
+var alienFigures = {};
 
 //Gamescenario
-var locations; // object containing positions, uncertainty, color and order
-var ind = 0;
-var task_changed = 1;
+var locations = {}; // object containing positions, uncertainty, color and order
+var score = -1;
+var currentIndex = 0;
+var taskId = 1;
 public
 var xReal;
 public
 var yReal;
 
-
-var bonus: String = "";
-var bonusp = 0;
-var kovetkezo_cam = 0;
-var cam_switch = 0;
 
 function Awake() {
     /* Read the possible locations of aliens from an external file
@@ -51,260 +32,85 @@ function Awake() {
     shuffleArray(locations["order"]);
     shuffleArray(locations["colors"]);
 
-    // Set up GUI
-    congrat = GameObject.Find("congrat").GetComponent(GUITexture);
-    imSorry = GameObject.Find("imSorry").GetComponent(GUITexture);
-    littleAlienYellow = GameObject.Find("littleAlienYellow").GetComponent(GUITexture);
-    littleAlienBlue = GameObject.Find("littleAlienBlue").GetComponent(GUITexture);
+    // Set up GUI Components
+    alienFigures[1] = GameObject.Find("littleAlienYellow").GetComponent(GUITexture);
+    alienFigures[2] = GameObject.Find("littleAlienBlue").GetComponent(GUITexture);
+    
     if (Application.loadedLevel == 8) {
         // if Map scene, the GUI has to be adapted
         var MapLevelCamera = GameObject.Find("1Camera_w_map");
-        littleAlienYellow.pixelInset.x = littleAlienBlue.pixelInset.x = Screen.width * 0.4;
+        alienFigures[1].pixelInset.x = alienFigures[2].pixelInset.x = Screen.width * 0.4;
     } else {
-        littleAlienYellow.pixelInset.x = littleAlienBlue.pixelInset.x = Screen.width * .85f;
+        alienFigures[1].pixelInset.x = alienFigures[2].pixelInset.x = Screen.width * .85f;
     }
 
-    littleAlienYellow.pixelInset.y = littleAlienBlue.pixelInset.y = Screen.height * .7f;
-    littleAlienBlue.pixelInset.size = littleAlienYellow.pixelInset.size = new Vector2(Screen.width * .12f, Screen.width * .12f);
-    littleAlienBlue.enabled = littleAlienYellow.enabled = false;
+    alienFigures[1].pixelInset.y = alienFigures[2].pixelInset.y = Screen.height * .7f;
+    alienFigures[1].pixelInset.size = alienFigures[2].pixelInset.size = new Vector2(Screen.width * .12f, Screen.width * .12f);
+    alienFigures[1].enabled = alienFigures[2].enabled = false;
 
     // Assign GameObjects
     alien = GameObject.Find("Goober_STBH");
-    yellowSpaceShip = GameObject.Find("yellowUFO_STBH");
-    blueSpaceShip = GameObject.Find("blueUFO_STBH");
-    bags[1] = GameObject.Find("bluebag");
-    bags[2] = GameObject.Find("yellowbag");
+    spaceShips[1] = GameObject.Find("yellowUFO_STBH");
+    spaceShips[2] = GameObject.Find("blueUFO_STBH");
+    bags[1] = GameObject.Find("yellowbag");
+    bags[2] = GameObject.Find("bluebag");
 
-    xReal = alien.transform.position.x;
-    yReal = alien.transform.position.z;
-
-    myStyle.normal.textColor = Color.white;
-    myStyle.fontSize = 30;
-
-    endTime = Time.time + 60.00 * 60.00;
-}
-
-function Update() {
-    // adjust the position of the alien to the camera
-
-    //print(locations['coordY']);
-
-    //print(ind);
-
-    //change camera in every set
-    //if (Input.GetKeyDown("s")) {cam_switch = 1;}
-    //change camera in every trial
-    if (Input.GetKeyDown("9")) { cam_switch = 2; }
-
-    NOWTIME = Time.time;
-    //prihanged);
-
-    if (ind == 2) { bonus = ""; }
-
-    // Check if all alien is collected
-
-    // Check if time is up
-    if (endTime < NOWTIME) {
-        endTime = NOWTIME + 100;
-        controlObject.GetComponent(Control).vege_signal = 1;
-        imSorry.enabled = true;
-    }
-
-
-    //testing
-    if (Input.GetKeyDown("space")) {
-        if (ind == 28) {
-            //controlObject.GetComponent(Control).vege_signal = 1;
-            //congrat.enabled = true;
-            StopCoroutine("Shuffle");
-            StartCoroutine("Shuffle");
-            bonus = " BONUS!!!";
-            kovetkezo_cam++;
-
-            if (kovetkezo_cam == GameObject.Find("Player_STBH").GetComponent(Control).Order.length) { Application.LoadLevel("scenechanger"); } else {
-                print(kovetkezo_cam);
-                GameObject.Find("Player_STBH").GetComponent(Control).cam = GameObject.Find("Player_STBH").GetComponent(Control).Order[kovetkezo_cam];
-            }
-            bonusp = ind + 10 + bonusp;
-            ind = 0;
-        }
-        if (ind < 28) {
-            //controlObject.GetComponent(Control).vege_signal = 1;
-            ind++;
-            congrat.enabled = false;
-        }
-        StartCoroutine("replaceAlien");
-    }
-
-    GameObject.Find("Player_STBH").GetComponent(Control).taskid = task_changed;
-
+    replaceAlien();
 };
+
 
 function OnGUI() {
-    var idoke = Mathf.CeilToInt(endTime - NOWTIME);
-    var displaySeconds = idoke % 60;
-    var displayMinutes = idoke / 60;
-    var ido = String.Format("{0:00}:{1:00}", displayMinutes, displaySeconds);
-    var points = ind + bonusp;
-    GUI.Label(Rect(70, 10, 600, 40), " time left:" + ido + "  / " + points.ToString() + " points " + bonus, myStyle);
-};
-//COLLIDER
-// if collider is alien, then hide it, and activate task
-// if collider is spaceship, then activate replaceAlien
-
-function OnTriggerEnter(col: Collider) {
-
-    if (col.gameObject == alien) {
-        alien.transform.Translate(0, -4, 0);
-        takeMe.Play();
-        yellowBag.renderer.enabled = false;
-        blueBag.renderer.enabled = false;
-        if (currentColor == 2) { //bonus = "                                    Yellow";
-            littleAlienYellow.enabled = true;
-            yellowSpaceShip.collider.enabled = true;
-            taskChanged = task_changed + 1;
-        } else if (currentColor == 1) { //bonus = "                                    Blue";
-            littleAlienBlue.enabled = true;
-            blueSpaceShip.collider.enabled = true;
-            taskChanged = task_changed + 1;
-        }
-
-
-    }
-
-    if (col.gameObject == blueSpaceShip) {
-        bonus = " ";
-        StartCoroutine("replaceAlien");
-        blueSpaceShip.collider.enabled = false;
-        yellowSpaceShip.collider.enabled = false;
-        if (cam_switch == 2) {
-            if (kovetkezo_cam == 5) { kovetkezo_cam = 0; };
-            GameObject.Find("Player_STBH").GetComponent(Control).cam = GameObject.Find("Player_STBH").GetComponent(Control).Order[kovetkezo_cam];
-            kovetkezo_cam++;
-        }
-        if (ind == 28) {
-            //controlObject.GetComponent(Control).vege_signal = 1;
-            //congrat.enabled = true;
-            StopCoroutine("Shuffle");
-            StartCoroutine("Shuffle");
-            bonus = " BONUS!!!";
-            if (cam_switch == 1) {
-                kovetkezo_cam++;
-                if (kovetkezo_cam == GameObject.Find("Player_STBH").GetComponent(Control).Order.length) { Application.LoadLevel("scenechanger"); } else {
-                    print(kovetkezo_cam);
-                    GameObject.Find("Player_STBH").GetComponent(Control).cam = GameObject.Find("Player_STBH").GetComponent(Control).Order[kovetkezo_cam];
-                }
-            }
-            bonusp = ind + 10 + bonusp;
-            ind = 0;
-        }
-        if (ind < 28) {
-            //controlObject.GetComponent(Control).vege_signal = 1;
-            ind++;
-        }
-    }
-
-    if (col.gameObject == yellowSpaceShip) {
-        bonus = " ";
-        StartCoroutine("replaceAlien");
-        blueSpaceShip.collider.enabled = false;
-        yellowSpaceShip.collider.enabled = false;
-        if (cam_switch == 2) {
-            if (kovetkezo_cam == 5) {
-                kovetkezo_cam = 0;
-                //HERE I AM
-                var temp_d = new Array();
-                var Order_d = new Array(1, 2, 3, 4, 5);
-                while (Order_d.Count != 0) {
-                    var index = Random.Range(0, Order_d.Count);
-                    var card = Order_d[index];
-                    Order_d.RemoveAt(index);
-                    temp_d.Add(card);
-                }
-                GameObject.Find("Player_STBH").GetComponent(Control).Order = temp_d;
-                print(GameObject.Find("Player_STBH").GetComponent(Control).Order);
-            };
-            GameObject.Find("Player_STBH").GetComponent(Control).cam = GameObject.Find("Player_STBH").GetComponent(Control).Order[kovetkezo_cam];
-            kovetkezo_cam++;
-        }
-        if (ind == 28) {
-            //controlObject.GetComponent(Control).vege_signal = 1;
-            //congrat.enabled = true;
-            shuffleArray(myColorList);
-            bonus = " BONUS!!!";
-
-
-            if (cam_switch == 1) {
-                kovetkezo_cam++;
-                if (kovetkezo_cam == GameObject.Find("Player_STBH").GetComponent(Control).Order.length) { Application.LoadLevel("scenechanger"); } else {
-                    print(kovetkezo_cam);
-                    GameObject.Find("Player_STBH").GetComponent(Control).cam = GameObject.Find("Player_STBH").GetComponent(Control).Order[kovetkezo_cam];
-                }
-            }
-            bonusp = ind + 10 + bonusp;
-            ind = 0;
-        }
-        if (ind < 28) {
-            //controlObject.GetComponent(Control).vege_signal = 1;
-            ind++;
-            congrat.enabled = false;
-        }
-    }
-}
-
-
-
-function replaceAlien() {
     /*
-    Replacement happens once the alien has been delivered
+    Display timer and points
+    */
+    var secondsLeft = Mathf.CeilToInt(Time.time);
+    var displaySeconds = secondsLeft % 60;
+    var displayMinutes = secondsLeft / 60;
+    var formattedTime = String.Format("{0:00}:{1:00}", displayMinutes, displaySeconds);
 
-    - First the Little alien figure is hided
-    - Sound is played ("Thank you")
-    - New position read assigned
-    - Bag assigned
+    var myStyle = new GUIStyle();
+    myStyle.normal.textColor = Color.white;
+    myStyle.fontSize = 30;
+    GUI.Label(Rect(70, 10, 600, 40), "Time: " + formattedTime + "  / "  + " Score: " + score.ToString(), myStyle);
+};
+
+
+function Update() {
+    /*
+    Here only the test features are placed
     */
 
-    // Hide aliens
-    littleAlienBlue.enabled = littleAlienYellow.enabled = false;
-
-    // Sound played
-    thankYou.Play();
-
-    // Position assignment
-    var xUncertainty = Random.Range(-1.0 * uncer, uncer);
-    var yUncertainty = Random.Range(-1.0 * uncer, uncer);
-    var xIdeal: float = location_coordX[PositionInd[ind]];
-    var yIdeal: float = location_coordY[PositionInd[ind]];
-    xReal = xIdeal + xUncertainty;
-    yReal = yIdeal + yUncertainty;
-
-    // Alien replaced
-    alien.transform.position = Vector3(xReal, 0, yReal);
-
-    // Assign correct bag color
-    bags[1].renderer.enabled = bags[2].renderer.enabled = false;
-    bags[locations["colors"][locations["currentIndex"]]].renderer.enabled = true;
-    task_changed = 3;
-
-}
+    // replace alien by pressing space >> only for testing
+    if (Input.GetKeyDown("space")) { replaceAlien(); };
+    
+};
 
 
-function shuffleArray(array) {
-    /**
-     * Randomize array element order in-place.
-     * Using Durstenfeld shuffle algorithm.
-     * Based on: http://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
-     */
-    for (var i = array.length - 1; i > 0; i--) {
-        var j = Mathf.Floor(Random.value * (i + 1));
-        var temp = array[i];
-        array[i] = array[j];
-        array[j] = temp;
+
+function OnTriggerEnter(col: Collider) {
+    /*
+    Handling of collision events
+
+    - colision w/ alien displace alien and activate GUI
+    - collision w/ spaceship changes camera and steps with the camera counter
+    */
+
+    if (col.gameObject == alien) {
+        if (taskId % 2 == 1) {
+            takeMe.Play(); // play signal
+            alien.transform.Translate(0, -4, 0); // remove alien from sight
+            alienFigures[locations["colors"][currentIndex]].enabled = true; // ena
+            taskId ++; // taskId either 2 or 4 in the memory phase
+        }
     }
-    return array;
-}
 
-
+    if (col.gameObject == spaceShips[locations["colors"][currentIndex]]) {
+        if (taskId % 2 == 0) {
+            replaceAlien();
+        }
+    }
+        
+};
 
 function readLocations(fileName) {
     /*
@@ -332,16 +138,86 @@ function readLocations(fileName) {
         if (i <= coordY.length/2) {colorList.Add(1);}; else {colorList.Add(2);};
     }
 
-    var currentIndex = 0;
 
     var locations = {
         "coordX": coordX,
         "coordY": coordY,
         "colors": colorList,
         "uncertainty": float.Parse(uncertainty.text),
-        "order": myOrder,
-        "currentIndex": currentIndex
+        "order": myOrder
     };
 
     return locations;
-}
+};
+
+
+
+function replaceAlien() {
+    /*
+    Replacement happens once the alien has been delivered
+
+    - First the Little alien figure is hided
+    - Sound is played ("Thank you")
+    - New position read assigned
+    - Bag assigned
+    */
+
+    // step in the index
+
+        currentIndex++;
+        if (currentIndex == 29) { 
+            shuffleArray(locations["order"]);
+            shuffleArray(locations["colors"]);
+            currentIndex = 1;
+        }
+
+        score++; // add one point
+
+        // Hide aliens
+        alienFigures[1].enabled = alienFigures[2].enabled = false;
+
+        // Sound played
+        thankYou.Play();
+
+        // Position assignment
+        print(locations["uncertainty"]);
+        var xUncertainty = Random.Range(-1.0 * locations["uncertainty"], 
+            locations["uncertainty"]);
+        var yUncertainty = Random.Range(-1.0 * locations["uncertainty"], 
+            locations["uncertainty"]);
+        var xIdeal: float = locations["coordX"][currentIndex];
+        var yIdeal: float = locations["coordY"][currentIndex];
+        xReal = xIdeal + xUncertainty;
+        yReal = yIdeal + yUncertainty;
+
+        // Alien replaced
+        alien.transform.position = Vector3(xReal, 0, yReal);
+
+        // Assign correct bag color
+        bags[1].renderer.enabled = bags[2].renderer.enabled = false;
+        bags[locations["colors"][currentIndex]].renderer.enabled = true;
+
+        // taskid
+        taskId = (locations["colors"][currentIndex]-0.5)*2; // taskId either 1 or 3 in the search phase
+
+};
+
+
+function shuffleArray(array) {
+    /**
+     * Randomize array element order in-place.
+     * Using Durstenfeld shuffle algorithm.
+     * Based on: http://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+     */
+    for (var i = array.length - 1; i > 0; i--) {
+        var j = Mathf.Floor(Random.value * (i + 1));
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+    return array;
+};
+
+
+
+
