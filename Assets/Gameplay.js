@@ -19,25 +19,21 @@ var yellowSpaceShip: GameObject;
 var blueSpaceShip: GameObject;
 var takeMe: AudioSource;
 var thankYou: AudioSource;
+var bags;
 var blueBag: GameObject;
 var yellowBag: GameObject;
-//var CUBE : GameObject; required for testing
 
 
 //Gamescenario
+var locations; // object containing positions, uncertainty, color and order
 var ind = 0;
-var location_coord_x = new Array();
-var location_coord_y = new Array();
-var myColorList = new Array(2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 1, 2, 1, 1, 2, 2, 1, 2, 1, 2, 1, 1, 2, 2, 1, 2, 2, 1);
-var helyvaltas;
-var PositionInd = new Array(4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28);
 var task_changed = 1;
 public
-var real_x;
+var xReal;
 public
-var real_y;
-var uncer: float;
-var currentColor = 1;
+var yReal;
+
+
 var bonus: String = "";
 var bonusp = 0;
 var kovetkezo_cam = 0;
@@ -46,82 +42,44 @@ var cam_switch = 0;
 function Awake() {
     /* Read the possible locations of aliens from an external file
     that is specific to all scenes, the file should be named "level".txt, 
-    where level matches the ID of the given level*/
+    where level matches the ID of the given level
+
+    positions are saved now with _position end, uncertainty for positioning
+    is saved as a single value with _uncertainty end*/
+    
     locations = readLocations(Application.loadedLevel.ToString());
+    shuffleArray(locations["order"]);
+    shuffleArray(locations["colors"]);
 
-    Debug.Log(locations["coord_y"]); 
-
-
-    // Find required gameobjects
+    // Set up GUI
     congrat = GameObject.Find("congrat").GetComponent(GUITexture);
     imSorry = GameObject.Find("imSorry").GetComponent(GUITexture);
     littleAlienYellow = GameObject.Find("littleAlienYellow").GetComponent(GUITexture);
     littleAlienBlue = GameObject.Find("littleAlienBlue").GetComponent(GUITexture);
-    alien = GameObject.Find("Goober_STBH");
-    yellowSpaceShip = GameObject.Find("yellowUFO_STBH");
-    blueSpaceShip = GameObject.Find("blueUFO_STBH");
-    blueBag = GameObject.Find("bluebag");
-    yellowBag = GameObject.Find("yellowbag");
-
-    print(GameObject.Find("Player_STBH").GetComponent(Control).Order.length);
-    //GameObject.Find("Player").GetComponent(Control).cam = GameObject.Find("Player").GetComponent(Control).Order[kovetkezo_cam];
-    if (Application.loadedLevel == 1) { uncer = 3.0;
-        location_coord_x = new Array(-30, 30, 30, -30, -15, -30, 0, -30, -30, -15, -15, 15, 0, 30, -30, 30, 15, 30, -30, 0, -15, 15, 0, 15, 0, 15, 30, 30, -15);
-        location_coord_y = new Array(30, 30, -30, -30, -30, 15, 30, -15, 0, 15, -15, 0, 15, 30, -30, -30, -15, 0, 30, -30, 30, 30, -15, -30, 0, 15, -15, 15, 0); }
-    if (Application.loadedLevel == 2) { uncer = 0.5;
-        location_coord_x = new Array(-5, 5, -7, 7, -3.8, -7.6, 0, -7.6, -7.6, -3.8, -3.8, 3.8, 0, 7.6, -7.6, 6, 3.8, 7.6, -7.6, 0, -6, 3.8, 0, 3.8, 0, 3.8, 7.6, 7.3, -3.8);
-        location_coord_y = new Array(-5, 5, -7, 7, -7.6, 3.8, 7.6, -3.8, 0, 3.8, -3.8, 0, 3.8, 7.6, -7.6, 6, -3.8, 0, 7.6, -7.6, -6, 7.6, -3.8, -7.6, 0, 3.8, -3.8, 3.8, 0); }
-    if (Application.loadedLevel == 3) { uncer = 2.5;
-        location_coord_x = new Array(0, 40, -5, 45, 0, -13, 13, -13, -13, 0, 0, 26, 13, 39, -13, 39, 26, 39, -13, 15, 0, 26, 13, 26, 13, 26, 39, 39, 0);
-        location_coord_y = new Array(20, -10, 22, -10, -18, 15, 26, -7, 4, 15, -7, 4, 15, 26, -18, -18, -7, 4, 26, -18, 26, 26, -7, -18, 4, 15, -7, 15, 4); }
-    if (Application.loadedLevel == 4) { uncer = 2.0;
-        location_coord_x = new Array(-26, 12, 5, 5, -15, -25, -5, -25, -25, -15, -15, 5, -5, 15, -25, 15, 5, 15, -25, -5, -15, 5, -5, 5, -5, 5, 15, 15, -15);
-        location_coord_y = new Array(-26, -26, -26, -20, -30, 0, 10, -20, -10, 0, -20, -10, 0, 10, -30, -30, -20, -10, 10, -30, 10, 10, -20, -30, -10, 0, -20, 0, -10); }
-    if (Application.loadedLevel == 5) { uncer = 2.5;
-        location_coord_x = new Array(0, 40, -5, 45, 0, -13, 13, -13, -13, 0, 0, 26, 13, 39, -13, 39, 26, 39, -13, 15, 0, 26, 13, 26, 13, 26, 39, 39, 0);
-        location_coord_y = new Array(20, -10, 22, -10, -18, 15, 26, -7, 4, 15, -7, 4, 15, 26, -18, -18, -7, 4, 26, -18, 26, 26, -7, -18, 4, 15, -7, 15, 4); }
-    if (Application.loadedLevel == 6) { uncer = 3.0;
-        location_coord_x = new Array(-30, 30, 30, -30, -15, -30, 0, -30, -30, -15, -15, 15, 0, 30, -30, 30, 15, 30, -30, 0, -15, 15, 0, 15, 0, 15, 30, 30, -15);
-        location_coord_y = new Array(30, 30, -30, -30, -30, 15, 30, -15, 0, 15, -15, 0, 15, 30, -30, -30, -15, 0, 30, -30, 30, 30, -15, -30, 0, 15, -15, 15, 0); }
-    if (Application.loadedLevel == 7) { uncer = 0.5;
-        location_coord_x = new Array(-5, 5, -7, 7, -3.8, -7.6, 0, -7.6, -7.6, -3.8, -3.8, 3.8, 0, 7.6, -7.6, 6, 3.8, 7.6, -7.6, 0, -6, 3.8, 0, 3.8, 0, 3.8, 7.6, 7.3, -3.8);
-        location_coord_y = new Array(-5, 5, -7, 7, -7.6, 3.8, 7.6, -3.8, 0, 3.8, -3.8, 0, 3.8, 7.6, -7.6, 6, -3.8, 0, 7.6, -7.6, -6, 7.6, -3.8, -7.6, 0, 3.8, -3.8, 3.8, 0); }
     if (Application.loadedLevel == 8) {
-        uncer = 3.0;
-        location_coord_x = new Array(-30, 30, 30, -30, -15, -30, 0, -30, -30, -15, -15, 15, 0, 30, -30, 30, 15, 30, -30, 0, -15, 15, 0, 15, 0, 15, 30, 30, -15);
-        location_coord_y = new Array(30, 30, -30, -30, -30, 15, 30, -15, 0, 15, -15, 0, 15, 30, -30, -30, -15, 0, 30, -30, 30, 30, -15, -30, 0, 15, -15, 15, 0);
-    }
-
-
-    if (Application.loadedLevel == 8) {
+        // if Map scene, the GUI has to be adapted
         var MapLevelCamera = GameObject.Find("1Camera_w_map");
-        x_pos = Screen.width * 0.4;
+        littleAlienYellow.pixelInset.x = littleAlienBlue.pixelInset.x = Screen.width * 0.4;
     } else {
-        x_pos = Screen.width * .85f;
+        littleAlienYellow.pixelInset.x = littleAlienBlue.pixelInset.x = Screen.width * .85f;
     }
 
-    littleAlienYellow.pixelInset.x = littleAlienBlue.pixelInset.x = x_pos;
     littleAlienYellow.pixelInset.y = littleAlienBlue.pixelInset.y = Screen.height * .7f;
     littleAlienBlue.pixelInset.size = littleAlienYellow.pixelInset.size = new Vector2(Screen.width * .12f, Screen.width * .12f);
     littleAlienBlue.enabled = littleAlienYellow.enabled = false;
 
-    
+    // Assign GameObjects
+    alien = GameObject.Find("Goober_STBH");
+    yellowSpaceShip = GameObject.Find("yellowUFO_STBH");
+    blueSpaceShip = GameObject.Find("blueUFO_STBH");
+    bags[1] = GameObject.Find("bluebag");
+    bags[2] = GameObject.Find("yellowbag");
 
-    real_x = alien.transform.position.x;
-    real_y = alien.transform.position.z;
-    var myArray = new Array();
-    for (var i = 1; i < 29; i++) {
-        myArray.Add(i);
-    }
-    print(myArray);
+    xReal = alien.transform.position.x;
+    yReal = alien.transform.position.z;
 
     myStyle.normal.textColor = Color.white;
     myStyle.fontSize = 30;
-
-    
-    //Shuffle the alienpositions
-    shuffleArray(myColorList);
-
 
     endTime = Time.time + 60.00 * 60.00;
 }
@@ -129,7 +87,7 @@ function Awake() {
 function Update() {
     // adjust the position of the alien to the camera
 
-
+    //print(locations['coordY']);
 
     //print(ind);
 
@@ -163,8 +121,10 @@ function Update() {
             bonus = " BONUS!!!";
             kovetkezo_cam++;
 
-            if (kovetkezo_cam == GameObject.Find("Player_STBH").GetComponent(Control).Order.length) { Application.LoadLevel("scenechanger"); } else { print(kovetkezo_cam);
-                GameObject.Find("Player_STBH").GetComponent(Control).cam = GameObject.Find("Player_STBH").GetComponent(Control).Order[kovetkezo_cam]; }
+            if (kovetkezo_cam == GameObject.Find("Player_STBH").GetComponent(Control).Order.length) { Application.LoadLevel("scenechanger"); } else {
+                print(kovetkezo_cam);
+                GameObject.Find("Player_STBH").GetComponent(Control).cam = GameObject.Find("Player_STBH").GetComponent(Control).Order[kovetkezo_cam];
+            }
             bonusp = ind + 10 + bonusp;
             ind = 0;
         }
@@ -173,7 +133,7 @@ function Update() {
             ind++;
             congrat.enabled = false;
         }
-        StartCoroutine("Helyvaltas");
+        StartCoroutine("replaceAlien");
     }
 
     GameObject.Find("Player_STBH").GetComponent(Control).taskid = task_changed;
@@ -190,7 +150,7 @@ function OnGUI() {
 };
 //COLLIDER
 // if collider is alien, then hide it, and activate task
-// if collider is spaceship, then activate helyvaltas
+// if collider is spaceship, then activate replaceAlien
 
 function OnTriggerEnter(col: Collider) {
 
@@ -214,7 +174,7 @@ function OnTriggerEnter(col: Collider) {
 
     if (col.gameObject == blueSpaceShip) {
         bonus = " ";
-        StartCoroutine("Helyvaltas");
+        StartCoroutine("replaceAlien");
         blueSpaceShip.collider.enabled = false;
         yellowSpaceShip.collider.enabled = false;
         if (cam_switch == 2) {
@@ -230,8 +190,10 @@ function OnTriggerEnter(col: Collider) {
             bonus = " BONUS!!!";
             if (cam_switch == 1) {
                 kovetkezo_cam++;
-                if (kovetkezo_cam == GameObject.Find("Player_STBH").GetComponent(Control).Order.length) { Application.LoadLevel("scenechanger"); } else { print(kovetkezo_cam);
-                    GameObject.Find("Player_STBH").GetComponent(Control).cam = GameObject.Find("Player_STBH").GetComponent(Control).Order[kovetkezo_cam]; }
+                if (kovetkezo_cam == GameObject.Find("Player_STBH").GetComponent(Control).Order.length) { Application.LoadLevel("scenechanger"); } else {
+                    print(kovetkezo_cam);
+                    GameObject.Find("Player_STBH").GetComponent(Control).cam = GameObject.Find("Player_STBH").GetComponent(Control).Order[kovetkezo_cam];
+                }
             }
             bonusp = ind + 10 + bonusp;
             ind = 0;
@@ -244,7 +206,7 @@ function OnTriggerEnter(col: Collider) {
 
     if (col.gameObject == yellowSpaceShip) {
         bonus = " ";
-        StartCoroutine("Helyvaltas");
+        StartCoroutine("replaceAlien");
         blueSpaceShip.collider.enabled = false;
         yellowSpaceShip.collider.enabled = false;
         if (cam_switch == 2) {
@@ -274,8 +236,10 @@ function OnTriggerEnter(col: Collider) {
 
             if (cam_switch == 1) {
                 kovetkezo_cam++;
-                if (kovetkezo_cam == GameObject.Find("Player_STBH").GetComponent(Control).Order.length) { Application.LoadLevel("scenechanger"); } else { print(kovetkezo_cam);
-                    GameObject.Find("Player_STBH").GetComponent(Control).cam = GameObject.Find("Player_STBH").GetComponent(Control).Order[kovetkezo_cam]; }
+                if (kovetkezo_cam == GameObject.Find("Player_STBH").GetComponent(Control).Order.length) { Application.LoadLevel("scenechanger"); } else {
+                    print(kovetkezo_cam);
+                    GameObject.Find("Player_STBH").GetComponent(Control).cam = GameObject.Find("Player_STBH").GetComponent(Control).Order[kovetkezo_cam];
+                }
             }
             bonusp = ind + 10 + bonusp;
             ind = 0;
@@ -290,46 +254,37 @@ function OnTriggerEnter(col: Collider) {
 
 
 
-function Helyvaltas() {
+function replaceAlien() {
+    /*
+    Replacement happens once the alien has been delivered
 
-    littleAlienBlue.enabled = false;
-    littleAlienYellow.enabled = false;
+    - First the Little alien figure is hided
+    - Sound is played ("Thank you")
+    - New position read assigned
+    - Bag assigned
+    */
+
+    // Hide aliens
+    littleAlienBlue.enabled = littleAlienYellow.enabled = false;
+
+    // Sound played
     thankYou.Play();
 
+    // Position assignment
+    var xUncertainty = Random.Range(-1.0 * uncer, uncer);
+    var yUncertainty = Random.Range(-1.0 * uncer, uncer);
+    var xIdeal: float = location_coordX[PositionInd[ind]];
+    var yIdeal: float = location_coordY[PositionInd[ind]];
+    xReal = xIdeal + xUncertainty;
+    yReal = yIdeal + yUncertainty;
 
-    //alien reposition
-    //print(ind);
-    //print(myColorList[ind]);
-    //print(PositionInd[ind]);
+    // Alien replaced
+    alien.transform.position = Vector3(xReal, 0, yReal);
 
-
-    //print(location_coord_x[PositionInd[ind]]);
-    //print(location_coord_y[PositionInd[ind]]);
-    var additional_x = Random.Range(-1.0 * uncer, uncer);
-    var additional_y = Random.Range(-1.0 * uncer, uncer);
-    //print(ind);
-    currentColor = myColorList[ind];
-    var xx: float = location_coord_x[PositionInd[ind]];
-    var yy: float = location_coord_y[PositionInd[ind]];
-    real_x = xx + additional_x;
-    real_y = yy + additional_y;
-    //print(real_x);
-    //print(real_y);
-    alien.transform.position = Vector3(real_x, 0, real_y);
-    //Bag activate
-    //print(myColorList[ind]);
-
-    if (currentColor == 2) {
-        yellowBag.renderer.enabled = true;
-        blueBag.renderer.enabled = false;
-        thanged = 3;
-    } else if (currentColor == 1) {
-        blueBag.renderer.enabled = true;
-        yellowBag.renderer.enabled = false;
-        thanged = 1;
-    }
-
-
+    // Assign correct bag color
+    bags[1].renderer.enabled = bags[2].renderer.enabled = false;
+    bags[locations["colors"][locations["currentIndex"]]].renderer.enabled = true;
+    task_changed = 3;
 
 }
 
@@ -351,28 +306,42 @@ function shuffleArray(array) {
 
 
 
-function readLocations(fileName){
+function readLocations(fileName) {
     /*
-    Reads a comma separated file to a 2d location array
+    Reads a comma separated files to object
+
+    Generates positions, their order, the positioning uncertainty and the colors too
     */
 
-    var coord_x = new Array();
-    var coord_y = new Array();
-    var dataFile= Resources.Load(fileName + '_positions') as TextAsset;
-    var dataLines = dataFile.text.Split("\n"[0]);
+    var coordX = new Array();
+    var coordY = new Array();
+    var dataFile = Resources.Load(fileName + '_positions') as TextAsset;
+    var dataLines = dataFile.text.Split("\n" [0]);
     for (var dataLine in dataLines) {
-     var dataPair = dataLine.Split(","[0]);
-     coord_x.Add(int.Parse(dataPair[0]));
-     coord_y.Add(int.Parse(dataPair[1]));
+        var dataPair = dataLine.Split("," [0]);
+        coordX.Add(int.Parse(dataPair[0]));
+        coordY.Add(int.Parse(dataPair[1]));
     }
 
     var uncertainty = Resources.Load(fileName + '_uncertainty') as TextAsset;
 
+    var myOrder = new Array();
+    var colorList = new Array();
+    for (var i = 1; i <= coordX.length; i++) {
+        myOrder.Add(i);
+        if (i <= coordY.length/2) {colorList.Add(1);}; else {colorList.Add(2);};
+    }
+
+    var currentIndex = 0;
+
     var locations = {
-        "coord_x": coord_x,
-        "coord_y": coord_y,
-        "uncertainty" : int.Parse(uncertainty.text)
+        "coordX": coordX,
+        "coordY": coordY,
+        "colors": colorList,
+        "uncertainty": float.Parse(uncertainty.text),
+        "order": myOrder,
+        "currentIndex": currentIndex
     };
-  
-  return locations;
+
+    return locations;
 }
