@@ -8,47 +8,22 @@
 //DECLARATION
 
 // Define variables needed for trajectory
-public
-var dataall = new Array();
-public
-var dataall2 = new Array();
-var DataSorszam = 1;
-public
-var vege_signal = 0; //Gameplay activates this when time is up our all aliens were found
-var taskid = 1;
-var camera_id: String;
-
+var trajectoryData = new Array();
 
 // Define variables needed for triggerfile
-var pulsesound: AudioSource;
-var TriggerSzam = 1;
-var TriggerIdok = new Array();
+var pulseSound: AudioSource;
+var triggerSoundArray = new Array();
 var VisualTrigger: GameObject;
 
-
 // Physics variables for movement
-var stepsound: AudioSource;
-var Hero: GameObject;
-var gravity = 20.0;
-private
-var myTransform: Transform;
-private
-var moveDirection = Vector3.zero;
+var stepSound: AudioSource;
 
 //Camera changer
-var cam = 0;
-var fps: Camera;
-var tps: Camera;
-var upcam: Camera;
-var lockupcam: Camera;
-var tpsallo: Camera;
-var fps_w_map: Camera;
-var map_looker: Camera;
+var mapWatcherCamera: Camera;
+public
 var cameras = {};
-
-var Order = new Array(1, 2, 3, 4, 5);
-var SetTime: float;
-var Ord_ind = 0;
+public
+var cameraName;
 
 
 //FUNCTIONS
@@ -61,23 +36,18 @@ function Awake() {
     cameras[3] = GameObject.Find("UpCamera").GetComponent(Camera);
     cameras[4] = GameObject.Find("UPAllo_STBH_tobeassignedtoPlayer").GetComponent(Camera);
     cameras[5] = GameObject.Find("3rdAllo_STBH_tobeassignedtoPlayer").GetComponent(Camera);
-    cameras[6] = {};
-    cameras[6][1] = GameObject.Find("1Camera_w_map").GetComponent(Camera);
-    cameras[6][2] = GameObject.Find("Map_watcher").GetComponent(Camera);
+    cameras[6] = GameObject.Find("1Camera_w_map").GetComponent(Camera);
+    mapWatcherCamera = GameObject.Find("Map_watcher").GetComponent(Camera);
     cameras[5].fieldOfView = cameras[2].fieldOfView = 54;
     cameras[3].transform.position.y = cameras[4].transform.position.y = 19.5 + 1.702;
-
-    myTransform = transform;
-    
-    
-
+    changeCamera(1);
 
     // create visual trigger
     VisualTrigger = GameObject.CreatePrimitive(PrimitiveType.Cube);
-    VisualTrigger.transform.position = Vector3(fps.transform.position.x, fps.transform.position.y, fps.transform.position.z + 1);
+    VisualTrigger.transform.position = Vector3(cameras[1].transform.position.x, cameras[1].transform.position.y, cameras[1].transform.position.z + 1);
     VisualTrigger.transform.localScale += new Vector3(10, 10, 0);
 
-
+    
 }
 
 function FixedUpdate() {
@@ -86,6 +56,8 @@ function FixedUpdate() {
 	*/
     Invoke("Oneplace", 0.05); //Position saving
 }
+
+
 
 function Update() {
 	/*
@@ -96,131 +68,156 @@ function Update() {
 	1-2-3-4-5-6 activates camera with the given cameraId
 	C = activates cloaking
 	S = switch camera in every trial
-
+	
+	// Application.CaptureScreenshot(cam + "-" + l + ".jpg"); l++;} // use it for recording
 	*/
+
+	// the map enabled follows its proprietary cameraview
+	mapWatcherCamera.enabled = cameras[6].enabled;
+
+	// set up the controller properties
+	var moveDirection = Vector3.zero;
+	var Hero: GameObject;
     var controller: CharacterController = GetComponent(CharacterController);
     if (controller.isGrounded) {
-        var moveDirection = myTransform.TransformDirection(Vector3.forward);
+        moveDirection = transform.TransformDirection(Vector3.forward);
     }
 
+    /////////////////////////////////////////////////
     //KEYBOARD CONTROL
-    //if (Input.GetKey("q")){
+    ////////////////////////////////////////////////
     if (Input.GetKey("up")) {
+    	var gravity = 20.0;
         moveDirection.y -= gravity * Time.deltaTime;
         var flags = controller.Move(moveDirection * 6 * Time.deltaTime);
         cameras[4].transform.position = cameras[3].transform.position;
-        cameras[2].transform.position = Vector3(transform.position.x, transform.position.y + 3.5, transform.position.z - 3.5);
+        cameras[5].transform.position = Vector3(transform.position.x, transform.position.y + 5.3, transform.position.z - 5.3);
     }
-    if (Input.GetKeyDown("up")) { stepsound.Play();
+    if (Input.GetKeyDown("up")) { stepSound.Play();
         Hero.GetComponent(Animator).SetFloat("Speed", 2); }
-    if (Input.GetKeyUp("up")) { stepsound.Stop();
+    if (Input.GetKeyUp("up")) { stepSound.Stop();
         Hero.GetComponent(Animator).SetFloat("Speed", 0); }
-    if (Input.GetKey("left")) { transform.Rotate(0, -80 * Time.deltaTime, 0); } // Application.CaptureScreenshot(cam + "-" + l + ".jpg"); l++;}
-    if (Input.GetKey("right")) { transform.Rotate(0, 80 * Time.deltaTime, 0); }
-    if (Input.GetKeyDown("t")) { StopCoroutine("Triggertad");
-        StartCoroutine("Triggertad");
-        if (Ord_ind == 5) { Ord_ind = 0; };
-        cam = Order[Ord_ind];
-        Ord_ind++; } //cam ++;
-    if (Input.GetKeyDown("1")) { StopCoroutine("Triggertad");
-        StartCoroutine("Triggertad");
-        cam = 1; }
-    if (Input.GetKeyDown("2")) { StopCoroutine("Triggertad");
-        StartCoroutine("Triggertad");
-        cam = 2; }
-    if (Input.GetKeyDown("3")) { StopCoroutine("Triggertad");
-        StartCoroutine("Triggertad");
-        cam = 3; }
-    if (Input.GetKeyDown("4")) { StopCoroutine("Triggertad");
-        StartCoroutine("Triggertad");
-        cam = 4; }
-    if (Input.GetKeyDown("5")) { StopCoroutine("Triggertad");
-        StartCoroutine("Triggertad");
-        cam = 5; }
-    if (Input.GetKeyDown("6")) { StopCoroutine("Triggertad");
-        StartCoroutine("Triggertad");
-        cam = 6; }
+    if (Input.GetKey("left")) { 
+    	transform.Rotate(0, -80 * Time.deltaTime, 0); } 
+    if (Input.GetKey("right")) { 
+    	transform.Rotate(0, 80 * Time.deltaTime, 0); }
+    
 
-    if (Input.GetKeyDown("escape")) { AdatMentes(); }
-    //}
+    // for compatibility with the epileptic studies
+    if (Input.GetKeyDown("t")) { triggerSound(); } 
 
+    if (Input.GetKeyDown("c")) { var cloakScript : Cloak[] = FindObjectsOfType(Cloak); 
+    	for (var l = 0; l < cloakScript.length; ++l){
+	    		cloakScript[l].enable_hiding = false;	    		
+	    	}
+	    }
+    
+    // change camera and triggers sound for sync
+    for (var i = 1; i <= cameras.Count; ++i) {
+	    if (Input.GetKeyDown("" + i)) {
+	    	triggerSound();
+	    	changeCamera(i);
+	   	    }
+	}
 
-
-
+	// finishes scene and saves data
+    if (Input.GetKeyDown("escape")) { saveDataToFile(); }
 
 }
 
 function Oneplace() {
-    var data1 = myTransform.eulerAngles.y + "\t" + myTransform.position.x + "\t" + myTransform.position.z + "\t" + Time.time + "\n";
-    dataall[DataSorszam] = data1;
-    var data2 = camera_id + "\t" + myTransform.eulerAngles.y + "\t" + myTransform.position.x + "\t" + 
-    			myTransform.position.z + "\t" + taskid + "\t" + GameObject.Find("Player_STBH").GetComponent(Gameplay).xReal + 
-    			"\t" + GameObject.Find("Player_STBH").GetComponent(Gameplay).yReal + "\t" + Time.time + "\n";
-    dataall2[DataSorszam] = data2;
-    //print(data2);
-    DataSorszam = DataSorszam + 1;
+    var oneTrajectorySample = cameraName + "\t" + 
+    						  transform.eulerAngles.y + "\t" +
+    						  transform.position.x + "\t" + 
+    						  transform.position.z + "\t" + 
+    						  GameObject.Find("Player_STBH").GetComponent(Gameplay).taskId + "\t" +
+    						  GameObject.Find("Player_STBH").GetComponent(Gameplay).xReal + "\t" + 
+    						  GameObject.Find("Player_STBH").GetComponent(Gameplay).yReal + "\t" + 
+    						  Time.time + "\n";
+
+    trajectoryData.Add(oneTrajectorySample);
 }
 
-function Triggertad() {
-    TriggerIdok[TriggerSzam] = Time.time;
-    TriggerSzam = TriggerSzam + 1;
-    //print (TriggerIdok);
-    //VisualTrigger.renderer.enabled = false;
-    Destroy(VisualTrigger);
-    pulsesound.Play();
+function triggerSound() {
+	/*
+	Used to give sync signals for the neural acquisition device
+	*/
+	Destroy(VisualTrigger); // Used for double trigger, sync also with video
+	pulseSound.Play(); // sound Sync signal
+
+	// Populate trigger signals to be later saved to a file
+    triggerSoundArray.Add(Time.time);
+
+    
 }
 
-function AdatMentes() {
-    //print ("vege");
-    vege_signal = 0;
-    print("END");
-    //print(dataall2);
-    var ido = System.DateTime.Now.ToString("hh-mm-dd-MM-yyyy");
-    var stream = System.IO.StreamWriter(ido + "scene" +  ".txt");
-    stream.WriteLine(dataall);
-    stream.Close();
-    stream = System.IO.StreamWriter(ido + "triggers" +  ".txt");
-    stream.WriteLine(TriggerIdok);
-    stream.Close();
-    print(TriggerIdok);
-    stream = System.IO.StreamWriter(ido + "scene_task" +  ".txt");
-    dataall2[0] = "Heading" + "\t" + "Pos_x" + "\t" + "Pos_y" + "\t" + "Task" + "\t" + "Alien_Pos_x" + "\t" + "Alien_Pos_y" + "\t" + "Time" + "\n";
-    stream.WriteLine(dataall2);
-    stream.Close();
-    print(dataall2);
+function saveDataToFile() {
+    /*
+	Saves three files
+	- Sound trigger times
+	- Trajectories
+	- Master data of the scene
 
-    //Master file
-    var masterfile_text = new Array();
-    var text = "Date of recording: " + ido + "\n";
-    text = text + "Scene: " + "\n";
-    text = text + "Duration of game: " + Time.time + "\n";
-    text = text + "Triggers: " + TriggerIdok + "\n";
-    text = text + "Name" + "\t" + "Pos_x" + "\t" + "Pos_y" + "\t" + "Pos_z" + "\t" + "Size coordinates (x-y-z)" + "\n";
-    text = text + "Spaceships:" + "\n";
-    var gos = GameObject.FindGameObjectsWithTag("Spaceship");
-    for (var i = 0; i < gos.Length; i++) {
-        text = text + gos[i].name + gos[i].transform.position + gos[i].transform.lossyScale + "\n";
-    }
-    text = text + "Walls:" + "\n";
-    gos = GameObject.FindGameObjectsWithTag("Wall");
-    for (i = 0; i < gos.Length; i++) {
-        text = text + gos[i].name + gos[i].transform.position + gos[i].transform.lossyScale + "\n";
-    }
-    text = text + "Obstacles:" + "\n";
-    gos = GameObject.FindGameObjectsWithTag("Obstacle");
-    for (i = 0; i < gos.Length; i++) {
-        text = text + gos[i].name + gos[i].transform.position + gos[i].transform.lossyScale + "\n";
-    }
-    text = text + "Lights and directions:" + "\n";
-    text = text + "Name" + "\t" + "Direction coordinates (x-y-z)" + "\n";
-    gos = GameObject.FindGameObjectsWithTag("Light");
-    for (i = 0; i < gos.Length; i++) {
-        text = text + gos[i].name + gos[i].transform.eulerAngles + "\n";
-    }
-    stream = System.IO.StreamWriter(Application.persistentDataPath + "/" + ido + "scene" + "masterfile.txt");
-    stream.WriteLine(text);
+	Nomenclature - every file starts with the time of escape button press
+	- has txt extension
+	- contains a reference for its contents
+    */
+
+    // General setup for files
+    var currentTimeString = System.DateTime.Now.ToString("hh-mm-dd-MM-yyyy");
+
+    // Writing trigger file
+    var stream = System.IO.StreamWriter(currentTimeString + "triggers" + Application.loadedLevelName + ".txt");
+    stream.WriteLine(triggerSoundArray);
     stream.Close();
-    print(text);
+    print(triggerSoundArray);
+
+    // Writing trajectories file
+    stream = System.IO.StreamWriter(currentTimeString + "scene_task" + Application.loadedLevelName + ".txt");
+    trajectoryData[0] = "Camera" + "\t" + "Heading" + "\t" + "Pos_x" + "\t" + "Pos_y" + "\t" + "Task" + "\t" + "Alien_Pos_x" + "\t" + "Alien_Pos_y" + "\t" + "Time" + "\n";
+    stream.WriteLine(trajectoryData);
+    stream.Close();
+    print(trajectoryData);
+
+    // Writing master file
+    /*
+	Master file contains all the necessary info about the scene layout and the context of the playing
+	Contains Walls, Obstacles, Lights and the location of spaceships
+
+    */
+
+    var masterFileText = "Date of recording: " + currentTimeString + "\n";
+    masterFileText = masterFileText + "Scene: " + Application.loadedLevelName + "\n";
+    masterFileText = masterFileText + "Duration of game: " + Time.time + "\n";
+    masterFileText = masterFileText + "Triggers: " + triggerSoundArray + "\n";
+    masterFileText = masterFileText + "Name" + "\t" + "Pos_x" + "\t" + "Pos_y" + "\t" + "Pos_z" + "\t" + "Size coordinates (x-y-z)" + "\n";
+    masterFileText = masterFileText + "Spaceships:" + "\n";
+    var gameObjectArray = GameObject.FindGameObjectsWithTag("Spaceship");
+    for (var i = 0; i < gameObjectArray.Length; i++) {
+        masterFileText = masterFileText + gameObjectArray[i].name + gameObjectArray[i].transform.position + gameObjectArray[i].transform.lossyScale + "\n";
+    }
+    masterFileText = masterFileText + "Walls:" + "\n";
+    gameObjectArray = GameObject.FindGameObjectsWithTag("Wall");
+    for (i = 0; i < gameObjectArray.Length; i++) {
+        masterFileText = masterFileText + gameObjectArray[i].name + gameObjectArray[i].transform.position + gameObjectArray[i].transform.lossyScale + "\n";
+    }
+    masterFileText = masterFileText + "Obstacles:" + "\n";
+    gameObjectArray = GameObject.FindGameObjectsWithTag("Obstacle");
+    for (i = 0; i < gameObjectArray.Length; i++) {
+        masterFileText = masterFileText + gameObjectArray[i].name + gameObjectArray[i].transform.position + gameObjectArray[i].transform.lossyScale + "\n";
+    }
+    masterFileText = masterFileText + "Lights and directions:" + "\n";
+    masterFileText = masterFileText + "Name" + "\t" + "Direction coordinates (x-y-z)" + "\n";
+    gameObjectArray = GameObject.FindGameObjectsWithTag("Light");
+    for (i = 0; i < gameObjectArray.Length; i++) {
+        masterFileText = masterFileText + gameObjectArray[i].name + gameObjectArray[i].transform.eulerAngles + "\n";
+    }
+    stream = System.IO.StreamWriter(Application.persistentDataPath + "/" + currentTimeString + "scene" + Application.loadedLevelName + "masterfile.txt");
+    stream.WriteLine(masterFileText);
+    stream.Close();
+    print(masterFileText);
+
+    // Takes back to home screen
     yield WaitForSeconds(1);
     Application.LoadLevel("scenechanger");
 };
@@ -242,79 +239,23 @@ function shuffleArray(array) {
 };
 
 function changeCamera(cameraId) {
-	
-	if (cam == 1) {
-        fps.enabled = true;
-        tps.enabled = false;
-        tpsallo.enabled = false;
-        upcam.enabled = false;
-        lockupcam.enabled = false;
-        fps_w_map.enabled = false;
-        map_looker.enabled = false;
-        camera_id = "fps";
-        GameObject.Find("avatar").transform.position.y = -2;
-        if (GameObject.Find("roof")) { GameObject.Find("roof").renderer.enabled = true; }
-    }
-    if (cam == 2) {
-        tps.enabled = true;
-        fps.enabled = false;
-        tpsallo.enabled = false;
-        upcam.enabled = false;
-        lockupcam.enabled = false;
-        fps_w_map.enabled = false;
-        map_looker.enabled = false;
-        camera_id = "tps";
-        GameObject.Find("avatar").transform.position.y = 0.5;
-        if (GameObject.Find("roof")) { GameObject.Find("roof").renderer.enabled = true; }
-    }
-    if (cam == 3) {
-        upcam.enabled = true;
-        fps.enabled = false;
-        tpsallo.enabled = false;
-        tps.enabled = false;
-        lockupcam.enabled = false;
-        fps_w_map.enabled = false;
-        map_looker.enabled = false;
-        camera_id = "upcam";
-        GameObject.Find("avatar").transform.position.y = 0.5;
-        if (GameObject.Find("roof")) { GameObject.Find("roof").renderer.enabled = false; }
-    }
-    if (cam == 4) {
-        lockupcam.enabled = true;
-        tpsallo.enabled = false;
-        upcam.enabled = false;
-        fps.enabled = false;
-        tps.enabled = false;
-        fps_w_map.enabled = false;
-        map_looker.enabled = false;
-        camera_id = "lockupcam";
-        GameObject.Find("avatar").transform.position.y = 0.5;
-        if (GameObject.Find("roof")) { GameObject.Find("roof").renderer.enabled = false; }
-    }
-    if (cam == 5) {
-        cam = 0;
-        tpsallo.enabled = true;
-        lockupcam.enabled = false;
-        upcam.enabled = false;
-        fps.enabled = false;
-        tps.enabled = false;
-        fps_w_map.enabled = false;
-        map_looker.enabled = false;
-        camera_id = "tpsallo";
-        GameObject.Find("avatar").transform.position.y = 0.5;
-        if (GameObject.Find("roof")) { GameObject.Find("roof").renderer.enabled = true; }
-    }
-    if (cam == 6) {
-        tpsallo.enabled = false;
-        lockupcam.enabled = false;
-        upcam.enabled = false;
-        fps.enabled = false;
-        tps.enabled = false;
-        fps_w_map.enabled = true;
-        map_looker.enabled = true;
-        camera_id = "maplooker";
-        GameObject.Find("avatar").transform.position.y = -2;
-        if (GameObject.Find("roof")) { GameObject.Find("roof").renderer.enabled = true; }
-    }
+	for (var l = 1; l <= cameras.Count; ++l){
+	    		cameras[l].enabled = false;	    		
+	    	}
+	    	cameras[cameraId].enabled = true;
+	    	cameraName = cameras[cameraId].name;
+	    	if (GameObject.Find("roof")) { GameObject.Find("roof").renderer.enabled = true; }
+	    	GameObject.Find("avatar").transform.position.y = 0.5;
+
+	    	// remove avatar from view for the 1st person views
+	    	if (cameraId == 1 || cameraId == 6) {
+	    		GameObject.Find("avatar").transform.position.y = -2;
+	    	}
+	    	// disable roof for bird's eye viewpoints
+	    	if (cameraId == 3 || cameraId == 4) {
+	    	    if (GameObject.Find("roof")) { 
+	    	    	GameObject.Find("roof").renderer.enabled = false; 
+	    	    }
+	    	}
 
 }

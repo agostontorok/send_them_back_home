@@ -12,13 +12,15 @@ var alienFigures = {};
 //Gamescenario
 var locations = {}; // object containing positions, uncertainty, color and order
 var score = -1;
-var currentIndex = 0;
+var currentIndex = -1;
+public
 var taskId = 1;
 public
 var xReal;
 public
 var yReal;
-
+var changeCameraInEveryTrial = false;
+var cameraArray = new Array();
 
 function Awake() {
     /* Read the possible locations of aliens from an external file
@@ -35,14 +37,6 @@ function Awake() {
     // Set up GUI Components
     alienFigures[1] = GameObject.Find("littleAlienYellow").GetComponent(GUITexture);
     alienFigures[2] = GameObject.Find("littleAlienBlue").GetComponent(GUITexture);
-    
-    if (Application.loadedLevel == 8) {
-        // if Map scene, the GUI has to be adapted
-        var MapLevelCamera = GameObject.Find("1Camera_w_map");
-        alienFigures[1].pixelInset.x = alienFigures[2].pixelInset.x = Screen.width * 0.4;
-    } else {
-        alienFigures[1].pixelInset.x = alienFigures[2].pixelInset.x = Screen.width * .85f;
-    }
 
     alienFigures[1].pixelInset.y = alienFigures[2].pixelInset.y = Screen.height * .7f;
     alienFigures[1].pixelInset.size = alienFigures[2].pixelInset.size = new Vector2(Screen.width * .12f, Screen.width * .12f);
@@ -82,6 +76,18 @@ function Update() {
 
     // replace alien by pressing space >> only for testing
     if (Input.GetKeyDown("space")) { replaceAlien(); };
+
+    // change camera in every trial
+    if (Input.GetKeyDown("s")) { changeCameraInEveryTrial = true; }
+
+    // change position if the mapcamera is enabled
+    var mapWatcherCamera = GameObject.Find("Map_watcher").GetComponent(Camera);
+    if (mapWatcherCamera.enabled) {
+        // if Map scene, the GUI has to be adapted
+        alienFigures[1].pixelInset.x = alienFigures[2].pixelInset.x = Screen.width * 0.4;
+    } else {
+        alienFigures[1].pixelInset.x = alienFigures[2].pixelInset.x = Screen.width * .85f;
+    }
     
 };
 
@@ -106,7 +112,23 @@ function OnTriggerEnter(col: Collider) {
 
     if (col.gameObject == spaceShips[locations["colors"][currentIndex]]) {
         if (taskId % 2 == 0) {
+            // Sound played
+            thankYou.Play();
+
             replaceAlien();
+
+            if (changeCameraInEveryTrial) { 
+                if (cameraArray.length == 0) {
+                    // refill camera array if empty
+                    availableCameras = GameObject.Find("Player_STBH").GetComponent(Control).cameras.Count;
+                    for (var camNum = 1; camNum < availableCameras; camNum++) { // never assign the map camera, also this means that the map camera has to be the last
+                        cameraArray.Add(camNum);
+                    }
+                    shuffleArray(cameraArray);
+                }
+                currentCamera = cameraArray.Pop();
+                GameObject.Find("Player_STBH").GetComponent(Control).changeCamera(currentCamera);
+            }
         }
     }
         
@@ -165,10 +187,10 @@ function replaceAlien() {
     // step in the index
 
         currentIndex++;
-        if (currentIndex == 29) { 
+        if (currentIndex == locations["coordX"].length) { 
             shuffleArray(locations["order"]);
             shuffleArray(locations["colors"]);
-            currentIndex = 1;
+            currentIndex = 0;
         }
 
         score++; // add one point
@@ -176,11 +198,7 @@ function replaceAlien() {
         // Hide aliens
         alienFigures[1].enabled = alienFigures[2].enabled = false;
 
-        // Sound played
-        thankYou.Play();
-
         // Position assignment
-        print(locations["uncertainty"]);
         var xUncertainty = Random.Range(-1.0 * locations["uncertainty"], 
             locations["uncertainty"]);
         var yUncertainty = Random.Range(-1.0 * locations["uncertainty"], 
