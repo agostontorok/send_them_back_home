@@ -3,7 +3,7 @@
 // see if touch input is changed in Unity 5
 // http://answers.unity3d.com/questions/354401/save-audio-to-a-file.html
 
-//DECLARATION
+//DECLARATION 
 
 // Define variables needed for trajectory
 var trajectoryData = new Array();

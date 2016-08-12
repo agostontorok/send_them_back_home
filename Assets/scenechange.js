@@ -1,29 +1,44 @@
+var logo : GUITexture;
+
 function OnGUI() {
-//GUI.Box (Rect (500,300,100,50), "LOADING");
-    if (GUI.Button(Rect(1010,10,100,50),"Open"))
+	magnifiyRatio = Screen.height / logo.pixelInset.height;
+	logo.pixelInset.height = Screen.height;
+	logo.pixelInset.width = logo.pixelInset.width * magnifiyRatio;
+	
+	verticalPosition = Screen.height * 0.01;
+	horizontalPosition = Screen.width *0.05;
+    if (GUI.Button(Rect(horizontalPosition,verticalPosition,100,50),"Open"))
 		{Application.LoadLevel ("openscene");
 		}
-    if (GUI.Button(Rect(1010,70,100,50),"Backyard"))
+	verticalPosition = verticalPosition + Screen.height * 0.1;
+    if (GUI.Button(Rect(horizontalPosition,verticalPosition,100,50),"Backyard"))
 		{Application.LoadLevel ("backyardscene");}
-	if (GUI.Button(Rect(1010,130,100,50),"Luxor"))
+	verticalPosition = verticalPosition + Screen.height * 0.1;
+	if (GUI.Button(Rect(horizontalPosition,verticalPosition,100,50),"Luxor"))
 		{
          Application.LoadLevel ("luxorscene");}
-    if (GUI.Button(Rect(1010,190,100,50),"Louvre"))
+    verticalPosition = verticalPosition + Screen.height * 0.1;
+    if (GUI.Button(Rect(horizontalPosition,verticalPosition,100,50),"Louvre"))
 		{
          Application.LoadLevel ("louvrescene");}
-		 
-	if (GUI.Button(Rect(1010,250,100,50),"Rect"))
+	verticalPosition = verticalPosition + Screen.height * 0.1;	 
+	if (GUI.Button(Rect(horizontalPosition,verticalPosition,100,50),"Rect"))
 		{
          Application.LoadLevel ("rectscene");}
-	if (GUI.Button(Rect(1010,310,100,50),"Square"))
+    verticalPosition = verticalPosition + Screen.height * 0.1;
+	if (GUI.Button(Rect(horizontalPosition,verticalPosition,100,50),"Square"))
 		{
          Application.LoadLevel ("squarescene");}
-	if (GUI.Button(Rect(1010,370,100,50),"Practice"))
+    verticalPosition = verticalPosition + Screen.height * 0.1;
+	if (GUI.Button(Rect(horizontalPosition,verticalPosition,100,50),"Practice"))
 		{
          Application.LoadLevel ("practice");}
-    if (GUI.Button(Rect(1010,430,100,50),"sample_city"))
+    verticalPosition = verticalPosition + Screen.height * 0.1;
+    if (GUI.Button(Rect(horizontalPosition,verticalPosition,100,50),"sample_city"))
 		{
          Application.LoadLevel ("sample_city");}
-	if (GUI.Button(Rect(1010,500,100,50),"QUIT"))
+    verticalPosition = Screen.height * 0.01;
+	horizontalPosition = Screen.width *0.9;
+	if (GUI.Button(Rect(horizontalPosition,verticalPosition,100,50),"QUIT"))
         { Application.Quit();}
 }

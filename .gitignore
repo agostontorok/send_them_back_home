@@ -1,1 +1,8 @@
-"" 
+*
+!Assets
+!Assets/*.js
+!Assets/*.cs
+!Assets/Resources
+!Assets/Prefabs_STBH
+!Assets/Resources/*
+!Assets/Prefabs_STBH/*
