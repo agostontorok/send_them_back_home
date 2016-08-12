@@ -1,9 +1,7 @@
-//Important changes: 
-//					no FPS in the trajectory file, columns are Direction PositionX PositionY Time
-//					trigger timing should be measured again
-//					waits three seconds if EXIT is pressed
-//					TODO Gives trigger when camera changed 
-//					playback button TODO
+// TODO: 
+// scenechanger 
+// see if touch input is changed in Unity 5
+// http://answers.unity3d.com/questions/354401/save-audio-to-a-file.html
 
 //DECLARATION
 
@@ -11,12 +9,13 @@
 var trajectoryData = new Array();
 
 // Define variables needed for triggerfile
-var pulseSound: AudioSource;
+var pulseSound = new AudioSource();
 var triggerSoundArray = new Array();
 var VisualTrigger: GameObject;
 
 // Physics variables for movement
-var stepSound: AudioSource;
+var stepSound = new AudioSource();
+var Hero: GameObject;
 
 //Camera changer
 var mapWatcherCamera: Camera;
@@ -28,6 +27,14 @@ var cameraName;
 
 //FUNCTIONS
 function Awake() {
+	/*
+	Prepare sounds	
+	*/
+	pulseSound = gameObject.AddComponent("AudioSource") as AudioSource;
+	stepSound = gameObject.AddComponent("AudioSource") as AudioSource;
+	pulseSound.clip = Resources.Load("pulse25msec");
+	stepSound.clip = Resources.Load("step2");
+	stepSound.loop = true;
     /*
 	Assign cameras
 	*/
@@ -36,12 +43,15 @@ function Awake() {
     cameras[3] = GameObject.Find("UpCamera").GetComponent(Camera);
     cameras[4] = GameObject.Find("UPAllo_STBH_tobeassignedtoPlayer").GetComponent(Camera);
     cameras[5] = GameObject.Find("3rdAllo_STBH_tobeassignedtoPlayer").GetComponent(Camera);
-    cameras[6] = GameObject.Find("1Camera_w_map").GetComponent(Camera);
-    mapWatcherCamera = GameObject.Find("Map_watcher").GetComponent(Camera);
+    if (GameObject.Find("Map_watcher")) {
+    	cameras[6] = GameObject.Find("1Camera_w_map").GetComponent(Camera);
+    	mapWatcherCamera = GameObject.Find("Map_watcher").GetComponent(Camera);
+    }
     cameras[5].fieldOfView = cameras[2].fieldOfView = 54;
     cameras[3].transform.position.y = cameras[4].transform.position.y = 19.5 + 1.702;
     changeCamera(1);
 
+    Hero = GameObject.Find("avatar");
     // create visual trigger
     VisualTrigger = GameObject.CreatePrimitive(PrimitiveType.Cube);
     VisualTrigger.transform.position = Vector3(cameras[1].transform.position.x, cameras[1].transform.position.y, cameras[1].transform.position.z + 1);
@@ -72,12 +82,13 @@ function Update() {
 	// Application.CaptureScreenshot(cam + "-" + l + ".jpg"); l++;} // use it for recording
 	*/
 
-	// the map enabled follows its proprietary cameraview
-	mapWatcherCamera.enabled = cameras[6].enabled;
+	if (GameObject.Find("Map_watcher")) {
+		// the map enabled follows its proprietary cameraview
+		mapWatcherCamera.enabled = cameras[6].enabled;}
 
 	// set up the controller properties
 	var moveDirection = Vector3.zero;
-	var Hero: GameObject;
+	
     var controller: CharacterController = GetComponent(CharacterController);
     if (controller.isGrounded) {
         moveDirection = transform.TransformDirection(Vector3.forward);
