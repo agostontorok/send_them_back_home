@@ -13,14 +13,16 @@ var alienFigures = {};
 var locations = {}; // object containing positions, uncertainty, color and order
 var score = -1;
 var currentIndex = -1;
+var changeCameraInEveryTrial = false;
+var cameraArray = new Array();
+
 public
 var taskId = 1;
 public
 var xReal;
 public
 var yReal;
-var changeCameraInEveryTrial = false;
-var cameraArray = new Array();
+
 
 function Awake() {
     /* Read the possible locations of aliens from an external file
@@ -33,6 +35,14 @@ function Awake() {
     locations = readLocations(Application.loadedLevel.ToString());
     shuffleArray(locations["order"]);
     shuffleArray(locations["colors"]);
+
+    /*
+    Prepare sounds  
+    */
+    takeMe = gameObject.AddComponent("AudioSource") as AudioSource;
+    thankYou = gameObject.AddComponent("AudioSource") as AudioSource;
+    takeMe.clip = Resources.Load("nowtakemetomyspaceship");
+    thankYou.clip = Resources.Load("thankyou");
 
     // Set up GUI Components
     alienFigures[1] = GameObject.Find("littleAlienYellow").GetComponent(GUITexture);
@@ -80,8 +90,13 @@ function Update() {
     // change camera in every trial
     if (Input.GetKeyDown("s")) { changeCameraInEveryTrial = true; }
 
+    var mapWatcherCamera;
     // change position if the mapcamera is enabled
-    var mapWatcherCamera = GameObject.Find("Map_watcher").GetComponent(Camera);
+    if (GameObject.Find("Map_watcher")) {
+        mapWatcherCamera = GameObject.Find("Map_watcher").GetComponent(Camera); }
+    else {mapWatcherCamera = {};
+    mapWatcherCamera["enabled"] = false;} // dummy variable}
+    
     if (mapWatcherCamera.enabled) {
         // if Map scene, the GUI has to be adapted
         alienFigures[1].pixelInset.x = alienFigures[2].pixelInset.x = Screen.width * 0.4;
@@ -147,8 +162,8 @@ function readLocations(fileName) {
     var dataLines = dataFile.text.Split("\n" [0]);
     for (var dataLine in dataLines) {
         var dataPair = dataLine.Split("," [0]);
-        coordX.Add(int.Parse(dataPair[0]));
-        coordY.Add(int.Parse(dataPair[1]));
+        coordX.Add(float.Parse(dataPair[0]));
+        coordY.Add(float.Parse(dataPair[1]));
     }
 
     var uncertainty = Resources.Load(fileName + '_uncertainty') as TextAsset;
