@@ -2,7 +2,9 @@
 !Assets
 !Assets/*.js
 !Assets/*.cs
+!Assets/ELTE_multidisz
 !Assets/Resources
 !Assets/Prefabs_STBH
+!Assets/ELTE_multidisz/*
 !Assets/Resources/*
 !Assets/Prefabs_STBH/*
